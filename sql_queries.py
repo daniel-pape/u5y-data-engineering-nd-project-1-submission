@@ -8,35 +8,171 @@ time_table_drop="DROP TABLE IF EXISTS time"
 
 # CREATE TABLES
 
-songplay_table_create = ("""CREATE TABLE IF NOT EXISTS songplays(timestamp varchar(255), user_id int, level varchar(255), song_id varchar(255), artist_id varchar(255), session_id varchar(255), location varchar(255), user_agent varchar(255))""")
+# For the null constraints: https://www.postgresqltutorial.com/postgresql-not-null-constraint/
 
-user_table_create = ("""CREATE TABLE IF NOT EXISTS users(user_id int, first_name varchar(255), last_name varchar(255), gender varchar(255), level varchar(255) )""")
+songplay_table_create = (
+    """
+    CREATE TABLE IF NOT EXISTS songplays \
+        (  
+            timestamp VARCHAR(255), 
+            user_id INT, 
+            level VARCHAR(255), 
+            song_id VARCHAR(255), 
+            artist_id VARCHAR(255), 
+            session_id VARCHAR(255), 
+            location VARCHAR(255), 
+            user_agent VARCHAR(255),
+            PRIMARY KEY (user_id, timestamp, session_id)
+        )
+    """
+)
 
-song_table_create=("""CREATE TABLE IF NOT EXISTS songs(song_id varchar(255), title varchar(255), artist_id varchar(255), year int, duration real)""")
+user_table_create = (
+    """
+    CREATE TABLE IF NOT EXISTS users
+        (
+            user_id INT PRIMARY KEY, 
+            first_name VARCHAR(255) NOT NULL, 
+            last_name VARCHAR(255) NOT NULL, 
+            gender VARCHAR(255) NOT NULL, 
+            level VARCHAR(255) NOT NULL
+        )
+    """
+)
 
-artist_table_create=("""CREATE TABLE IF NOT EXISTS artists(artist_id varchar(255), name varchar(255), location varchar(255), latitude real, longitude real)""")
+song_table_create = (
+    """
+    CREATE TABLE IF NOT EXISTS songs
+        (
+            song_id VARCHAR(255) PRIMARY KEY, 
+            title VARCHAR(255) NOT NULL, 
+            artist_id VARCHAR(255) NOT NULL, 
+            year INT NOT NULL, 
+            duration FLOAT NOT NULL
+        )
+    """
+)
 
-time_table_create=("""CREATE TABLE IF NOT EXISTS time(timestamp varchar(255), hour int, day int, week_of_year int, month int, year int)""")
+artist_table_create = (
+    """
+    CREATE TABLE IF NOT EXISTS artists
+    (
+        artist_id VARCHAR(255) PRIMARY KEY, 
+        name VARCHAR(255) NOT NULL, 
+        location VARCHAR(255) NOT NULL, 
+        latitude REAL NOT NULL, 
+        longitude REAL NOT NULL
+    )
+    """
+)
+
+time_table_create = (
+    """
+    CREATE TABLE IF NOT EXISTS time
+    (
+        timestamp VARCHAR(255) PRIMARY KEY, 
+        hour INT NOT NULL, 
+        day INT NOT NULL, 
+        week_of_year INT NOT NULL, 
+        month INT NOT NULL, 
+        year INT NOT NULL
+    )
+    """
+)
 
 # INSERT RECORDS
 
-songplay_table_insert=("""INSERT INTO songplays(timestamp, user_id, level, song_id, artist_id, session_id, location, user_agent) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)""")
+# For the upserts: https://www.postgresqltutorial.com/postgresql-upsert/
 
-user_table_insert=("""INSERT INTO users(user_id, first_name, last_name, gender, level) VALUES (%s, %s, %s, %s, %s)""")
+songplay_table_insert = (
+    """
+    INSERT INTO songplays
+    (
+        timestamp, 
+        user_id, 
+        level, 
+        song_id, 
+        artist_id, 
+        session_id, 
+        location, 
+        user_agent
+    ) 
+    VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+    """
+)
 
-song_table_insert=("""INSERT INTO songs(song_id, title, artist_id, year, duration) VALUES (%s, %s, %s, %s, %s)""")
+user_table_insert = (
+    """
+    INSERT INTO users
+    (
+        user_id, 
+        first_name, 
+        last_name, 
+        gender, 
+        level
+    )
+    VALUES (%s, %s, %s, %s, %s)
+    ON CONFLICT(user_id) DO NOTHING
+    """
+)
 
-artist_table_insert=("""INSERT INTO artists(artist_id, name, location, latitude, longitude) VALUES (%s, %s, %s, %s, %s)""")
+song_table_insert = (
+    """
+    INSERT INTO songs(
+        song_id,
+        title, 
+        artist_id, 
+        year, 
+        duration
+    ) VALUES (%s, %s, %s, %s, %s)
+    ON CONFLICT(song_id) DO NOTHING
+    """
+)
 
-time_table_insert=("""INSERT INTO time(timestamp, hour, day, week_of_year, month, year) VALUES (%s, %s, %s, %s, %s, %s)""")
+artist_table_insert =  (
+    """
+    INSERT INTO artists(
+        artist_id, 
+        name, 
+        location, 
+        latitude, 
+        longitude
+    ) VALUES (%s, %s, %s, %s, %s)
+    ON CONFLICT(artist_id) DO NOTHING
+    """
+)
+
+time_table_insert = (
+    """
+    INSERT INTO time(
+        timestamp, 
+        hour, 
+        day, 
+        week_of_year, 
+        month, 
+        year
+    ) VALUES (%s, %s, %s, %s, %s, %s)
+    ON CONFLICT(timestamp) DO NOTHING
+    """
+)
 
 # FIND SONGS
 
-song_select="""SELECT songs.song_id, artists.artist_id FROM artists JOIN songs ON artists.artist_id = songs.artist_id WHERE songs.title = %s AND artists.name = %s AND round(cast(songs.duration as numeric),3) = %s"""
+song_select = (
+    """
+    SELECT 
+        songs.song_id, 
+        artists.artist_id 
+    FROM artists JOIN songs ON artists.artist_id = songs.artist_id 
+    WHERE songs.title = %s 
+    AND artists.name = %s 
+    AND round(cast(songs.duration as numeric),3) = %s
+    """
+)
 
 # QUERY LISTS
 
-create_table_queries=[
+create_table_queries = [
     songplay_table_create,
     user_table_create,
     song_table_create,
@@ -44,11 +180,10 @@ create_table_queries=[
     time_table_create
 ]
 
-drop_table_queries=[
+drop_table_queries = [
     songplay_table_drop,
     user_table_drop,
     song_table_drop,
     artist_table_drop,
     time_table_drop
 ]
-
