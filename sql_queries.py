@@ -14,15 +14,15 @@ songplay_table_create = (
     """
     CREATE TABLE IF NOT EXISTS songplays \
         (  
-            timestamp VARCHAR(255), 
-            user_id INT, 
+            songplay_id SERIAL PRIMARY KEY,
+            timestamp VARCHAR(255) NOT NULL, 
+            user_id INT NOT NULL, 
             level VARCHAR(255), 
             song_id VARCHAR(255), 
             artist_id VARCHAR(255), 
             session_id VARCHAR(255), 
             location VARCHAR(255), 
-            user_agent VARCHAR(255),
-            PRIMARY KEY (user_id, timestamp, session_id)
+            user_agent VARCHAR(255)
         )
     """
 )
@@ -112,7 +112,9 @@ user_table_insert = (
         level
     )
     VALUES (%s, %s, %s, %s, %s)
-    ON CONFLICT(user_id) DO NOTHING
+    ON CONFLICT(user_id)
+    DO 
+    UPDATE SET level=EXCLUDED.level
     """
 )
 
@@ -125,7 +127,9 @@ song_table_insert = (
         year, 
         duration
     ) VALUES (%s, %s, %s, %s, %s)
-    ON CONFLICT(song_id) DO NOTHING
+    ON CONFLICT(song_id) 
+    DO 
+    NOTHING
     """
 )
 
@@ -138,7 +142,9 @@ artist_table_insert =  (
         latitude, 
         longitude
     ) VALUES (%s, %s, %s, %s, %s)
-    ON CONFLICT(artist_id) DO NOTHING
+    ON CONFLICT(artist_id) 
+    DO 
+    NOTHING
     """
 )
 
@@ -152,7 +158,9 @@ time_table_insert = (
         month, 
         year
     ) VALUES (%s, %s, %s, %s, %s, %s)
-    ON CONFLICT(timestamp) DO NOTHING
+    ON CONFLICT(timestamp) 
+    DO 
+    NOTHING
     """
 )
 
